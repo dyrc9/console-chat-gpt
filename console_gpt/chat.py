@@ -1,5 +1,4 @@
-from unichat import UnifiedChatApi
-from unichat.api_helper import openai
+from openai import OpenAI
 
 from console_gpt.catch_errors import handle_with_exceptions
 from console_gpt.config_manager import fetch_variable
@@ -25,10 +24,16 @@ def chat(console, data, managed_user_prompt) -> None:
         model_title,
     ) = data.model.values()
 
+
+    # if model_title == "deepseek_models":
+    #     client = OpenAI(api_key=api_key, DEFAULT_BASE_URL="https://cloud.infini-ai.com/maas/v1")
+    # else:
+    from console_gpt.constants import BASE_URL
     client = (
-        openai.OpenAI(base_url="http://localhost:11434/v1", api_key=api_key)
+        OpenAI(base_url="http://localhost:11434/v1", api_key=api_key)
         if model_title == "ollama"
-        else UnifiedChatApi(api_key=api_key)
+        else OpenAI(api_key=api_key, base_url=BASE_URL) if BASE_URL
+        else OpenAI(api_key=api_key)
     )
     conversation = data.conversation
     temperature = data.temperature

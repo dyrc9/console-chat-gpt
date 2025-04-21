@@ -123,6 +123,9 @@ def fetch_variable(*args, auto_exit: bool = True) -> Any:
     :param args: variable group/name as deep as necessary
     :param auto_exit: Automatically abort if var is missing
     :return: Content or Error (with exit)
+    
+    New config parameter support:
+    - base_url: The base URL for API endpoints
     """
     config = _load_toml(CONFIG_PATH)
     chat_var = config["chat"]

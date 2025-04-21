@@ -6,7 +6,7 @@ import textwrap
 import time
 from typing import List, Optional, Tuple
 
-from unichat.api_helper import openai
+from openai import OpenAI
 
 from console_gpt.config_manager import (ASSISTANTS_PATH, fetch_variable,
                                         write_to_config)
@@ -159,7 +159,7 @@ def _new_assistant(model):
 
 
 def _assistant_init(model, assistant_tools, role_title, role) -> Tuple:
-    client = openai.OpenAI(api_key=model["api_key"])
+    client = OpenAI(api_key=model["api_key"])
     # Step 1: Initialize  an Assistant
     assistant = _create_assistant(client, model, assistant_tools, role_title, role)
     # Step 2: Create a Thread
@@ -266,7 +266,7 @@ def _create_assistant(client, model, assistant_tools, role_title, role):
 
 
 def _list_assistants(model) -> Optional[List[str]]:
-    client = openai.OpenAI(api_key=model["api_key"])
+    client = OpenAI(api_key=model["api_key"])
     # Get assistants stored locally
     local_assistants_names = [
         os.path.splitext(os.path.basename(path))[0] for path in glob.glob(os.path.join(ASSISTANTS_PATH, "*.json"))
@@ -303,7 +303,7 @@ def _list_assistants(model) -> Optional[List[str]]:
 
 
 def _get_remote_assistant(model, id):
-    client = openai.OpenAI(api_key=model["api_key"])
+    client = OpenAI(api_key=model["api_key"])
     assistant = client.beta.assistants.retrieve(id).model_dump_json()
     assistant_json = json.loads(assistant)
     if assistant_json["id"] == id:
@@ -320,14 +320,14 @@ def _get_remote_assistant(model, id):
 
 
 def _modify_assisstant(model, name, instructions, tools):
-    client = openai.OpenAI(api_key=model["api_key"])
+    client = OpenAI(api_key=model["api_key"])
     new_tools = [] if tools == None else tools
     id, _ = _get_local_assistant(name)
     try:
         updated_assistant = client.beta.assistants.update(
             assistant_id=id, instructions=instructions, name=name, tools=new_tools, model=model["model_name"]
         ).model_dump_json()
-    except openai.BadRequestError as e:
+    except OpenAI.BadRequestError as e:
         custom_print("error", str(e))
         return
     updated_assistant_json = json.loads(updated_assistant)
@@ -342,7 +342,7 @@ def _modify_assisstant(model, name, instructions, tools):
 
 
 def _delete_assistant(model, assistants):
-    client = openai.OpenAI(api_key=model["api_key"])
+    client = OpenAI(api_key=model["api_key"])
     removed_assistants = base_checkbox_menu(assistants, " Assistant removal:")
     for assistant in removed_assistants:
         assistant_path = os.path.join(ASSISTANTS_PATH, decapitalize(assistant) + ".json")
@@ -355,7 +355,7 @@ def _delete_assistant(model, assistants):
         try:
             response = client.beta.threads.delete(thread_id)
             custom_print("info", str(response))
-        except openai.NotFoundError as e:
+        except OpenAI.NotFoundError as e:
             custom_print("error", str(e))
         os.remove(assistant_path)
         custom_print("info", f"Assistant {assistant_path}  successfully deleted.")
@@ -366,7 +366,7 @@ def _delete_assistant(model, assistants):
 
 
 def _create_thread(model) -> str:
-    client = openai.OpenAI(api_key=model["api_key"])
+    client = OpenAI(api_key=model["api_key"])
     thread = client.beta.threads.create()
     return thread.id
 
@@ -480,7 +480,7 @@ def run_thread(client, assistant_id, thread_id):
         run = client.beta.threads.runs.cancel(thread_id=thread_id, run_id=run.id)
         # Notifying the user about the interrupt but continues normally.
         custom_print("info", "Interrupted the request. Continue normally.")
-    except openai.BadRequestError as e:
+    except OpenAI.BadRequestError as e:
         custom_print("error", str(e))
     except Exception as e:
         custom_print("error", f"Unexpected error: {str(e)}")

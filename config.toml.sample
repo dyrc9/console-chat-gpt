@@ -7,6 +7,9 @@
 changelog_checksum = "dummy_value"
 
 # Feel free to edit any value below this line
+[chat]
+base_url = "https://cloud.infini-ai.com/maas/v1/chat/completions"  # Custom API endpoint URL (e.g. "https://api.example.com/v1")
+
 [chat.customizations]
 use_emoji = true
 fallback_char = "?"
@@ -43,6 +46,23 @@ manager = "Share leadership insights to boost team efficiency, collaboration, an
 nutritionist = "Advise on nutrition blending science with practicality, focusing on proven, sustainable dietary habits."
 scientist = "Make science engaging and understandable across math, physics, chemistry, and biology."
 assistant = "Deliver precise and informative virtual assistance for any inquiry efficiently."
+
+# ==================================
+# DeepSeek models
+# ==================================
+[chat.models.deepseek-v3]
+api_key = "YOUR_DEEPSEEK_API_KEY"
+model_input_pricing_per_1k = 0.00027
+model_max_tokens = 8192
+model_name = "deepseek-v3"
+model_output_pricing_per_1k = 0.0011
+
+[chat.models.deepseek-r1]
+api_key = "YOUR_DEEPSEEK_API_KEY"
+model_input_pricing_per_1k = 0.00055
+model_max_tokens = 8192
+model_name = "deepseek-r1"
+model_output_pricing_per_1k = 0.00219
 
 # ==================================
 # OpenAI models
@@ -275,23 +295,6 @@ model_input_pricing_per_1k = 0.00125
 model_max_tokens = 8192
 model_name = "gemini-2.5-pro-preview-03-25"
 model_output_pricing_per_1k = 0.01
-
-# ==================================
-# DeepSeek models
-# ==================================
-[chat.models.deepseek-chat]
-api_key = "YOUR_DEEPSEEK_API_KEY"
-model_input_pricing_per_1k = 0.00027
-model_max_tokens = 8192
-model_name = "deepseek-chat"
-model_output_pricing_per_1k = 0.0011
-
-[chat.models.deepseek-reasoner]
-api_key = "YOUR_DEEPSEEK_API_KEY"
-model_input_pricing_per_1k = 0.00055
-model_max_tokens = 8192
-model_name = "deepseek-reasoner"
-model_output_pricing_per_1k = 0.00219
 
 # ==================================
 # Alibaba Cloud models

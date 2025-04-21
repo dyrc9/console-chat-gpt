@@ -2,7 +2,7 @@ import json
 from typing import Tuple
 
 from rich.console import Console
-from unichat import UnifiedChatApi
+from openai import OpenAI
 
 from console_gpt.catch_errors import sigint_wrapper
 from console_gpt.config_manager import fetch_variable
@@ -23,7 +23,7 @@ tools = [
             "properties": {
                 "model": {
                     "type": "string",
-                    "enum": ["gpt-41", "gpt-41-mini", "o1", "o3-mini"],
+                    "enum": ["gpt-41", "gpt-41-mini", "o1", "o3-mini", "deepseek-v3"],
                     "description": "The selected AI model based on query analysis",
                 },
                 "messages": {
@@ -60,7 +60,13 @@ def managed_prompt() -> Tuple[ChatObject, str]:
     """
     assistant = configure_assistant()
     model_name, system_prompt, user_prompt = get_model_and_prompts_based_on_conversation(assistant)
+    # # Handle model name mapping for API compatibility
+    # api_model_name = {
+    #     "deepseek-v3": "deepseek-chat"
+    # }.get(model_name, model_name)
+    
     model_data = fetch_variable("models", model_name)
+    # model_data["model_name"] = api_model_name  # Update model name for API call
     model_data.update(dict(model_title=model_name))
     model_data = update_api_key_if_placeholder(model_data)
     temperature = temperature_prompt()
@@ -89,7 +95,8 @@ def get_client(assistant):
     Init the client
     :param assistant: Data from the config
     """
-    return UnifiedChatApi(api_key=assistant["api_key"])
+    from console_gpt.constants import BASE_URL
+    return OpenAI(api_key=assistant["api_key"], base_url=BASE_URL) if BASE_URL else OpenAI(api_key=assistant["api_key"])
 
 
 @sigint_wrapper
@@ -97,8 +104,12 @@ def send_request(client, assistant, conversation):
     role = {"role": "system", "content": assistant["role"]}
     conversation.insert(0, role)
     response = client.chat.completions.create(
-        model=assistant["model_name"], messages=conversation, stream=False, tools=tools
-    )
+            model=assistant["model_name"], 
+            messages=conversation, 
+            stream=False, 
+            tools=tools,
+            tool_choice={"type": "function", "function": {"name": "managed_prompt"}}
+        )
     return response.choices[0].message.tool_calls
 
 

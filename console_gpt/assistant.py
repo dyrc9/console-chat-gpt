@@ -1,4 +1,4 @@
-from unichat.api_helper import openai
+from openai import OpenAI
 
 from console_gpt.config_manager import fetch_variable
 from console_gpt.custom_stdout import custom_print
@@ -12,7 +12,8 @@ from mcp_servers.mcp_tcp_client import MCPClient
 
 
 def assistant(console, data) -> None:
-    client = openai.OpenAI(api_key=data.model["api_key"])
+    from console_gpt.constants import BASE_URL
+    client = OpenAI(api_key=data.model["api_key"], base_url=BASE_URL) if BASE_URL else OpenAI(api_key=data.model["api_key"])
     # Step 3: Add a Message to a Thread
     while True:
         user_input = assistant_user_prompt()
@@ -47,7 +48,7 @@ def assistant(console, data) -> None:
                 user_input = handled_user_input
         try:
             message = create_message(client, data.thread_id, user_input)
-        except openai.NotFoundError as e:
+        except (OpenAI.NotFoundError, OpenAI.APIConnectionError, OpenAI.APIError) as e:
             custom_print(
                 "error",
                 "The thread specified in the local assistant file does not exist. Please edit the assistant and try again.",

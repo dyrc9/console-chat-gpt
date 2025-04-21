@@ -1,3 +1,9 @@
+from console_gpt.config_manager import fetch_variable
+
+# API configuration
+# BASE_URL = fetch_variable("chat", "base_url", auto_exit=False)
+BASE_URL = "https://cloud.infini-ai.com/maas/v1"
+
 from questionary import Style
 
 help_options = {
